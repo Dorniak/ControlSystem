@@ -24,6 +24,15 @@
     <ClInclude Include="Control.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="DataAnalisys\DataAnalisys.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="DataReader\reader.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="OpenGl\OpenGl.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\Lidar\Lidar\Obstaculo.cpp">
@@ -36,6 +45,15 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Control.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="DataAnalisys\DataAnalisys.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="DataReader\reader.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="OpenGl\OpenGl.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

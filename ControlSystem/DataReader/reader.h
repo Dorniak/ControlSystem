@@ -3,8 +3,9 @@
 #pragma warning( disable : 4244 ) //Life is not perfect
 #include "Punto3D.h"
 #include <cliext/vector>
+#include "../Control.h"
 
-
+#using "System.dll"
 using namespace std;
 using namespace System;
 using namespace System::Net;

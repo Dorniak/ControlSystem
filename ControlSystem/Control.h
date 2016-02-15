@@ -9,6 +9,8 @@
 #define FlagTratamiento 3
 #define FlagWarning 4
 #define FlagPausa 5
+#define FlagAnalisysOn 6
+#define FlagOpenGlOn 7
 
 
 using namespace std;
@@ -20,15 +22,19 @@ ref class Control {
 public:
 	//Constructor
 	Control();
-	List<Obstaculo^>^ Obstaculos = gcnew List<Obstaculo^>();
-	List<Punto3D^>^ Puntos = gcnew List<Punto3D^>();
-	List<int>^ Conclusiones = gcnew List<int>();
-	List<int>^ Flags = gcnew List<int>();
+	List<Obstaculo^>^ Obstaculos;
+	List<Punto3D^>^ Puntos;
+	List<int>^ Conclusiones;
+	cli::array<bool>^ Flags;
+	cli::array<double>^ ArrayDataAnalisys;
 	void setFlagTratamiento();
+	void Iniciar();
+	void reActivar();
 	//Objeto OpenGl
 private:
 	//Objetos Reader y Analisys
 	void interpretarConclusiones();
+	void IniciarThreads();
 protected:
 	
 };

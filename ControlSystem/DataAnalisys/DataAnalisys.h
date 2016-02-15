@@ -1,6 +1,7 @@
 #pragma once
 #include "Obstaculo.h"
 #include <math.h>
+#include "../Control.h"
 
 //#include <cliext/vector> para clases referenciadas
 #define NUMERO_FILAS 16 //Coincide con el numero de canales
