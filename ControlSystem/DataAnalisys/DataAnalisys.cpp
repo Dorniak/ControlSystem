@@ -15,9 +15,9 @@ DataAnalisys::DataAnalisys()
 //consigna velocidad:: puntero para devolucion de parametro de velocidad
 //consigna volante:: puntero para devolucion de parametro de volante
 //apertura::Angulo de interes de lectura en grados
-void DataAnalisys::Analisys(cli::array<Object^> ^ data) {
+void DataAnalisys::Analisys(Control^ C) {
 
-	parameters_in = (cli::array<Object^>^)data;
+	Controlador = C;
 	if (!thread_analysis || thread_analysis->ThreadState != System::Threading::ThreadState::Running) {
 		thread_analysis = gcnew Thread(gcnew ThreadStart(this, &DataAnalisys::AnalisysThread));
 		thread_analysis->Start();
@@ -40,14 +40,14 @@ void DataAnalisys::AnalisysThread(){
 	//En caso de que se desactive y se reactive despues hay que limpiar los objetos
 
 	ObstaculosvAnt->Clear();
-	/*
+	
 	//TODO:Modificar la funcion con un while y añadir las modificaciones de flags
-	while (myflag) {
-		if (Warning == 0 && Control->Reader == 0) {
-			matriz = Control->Puntos;
-			resolution = Control->resolucion;
-			VCOCHE = Control->Vcoche;
-			apertura = Control->apertura;
+	while (Controlador->Flags[FlagAnalisysOn]) {
+		if (Controlador->Flags[FlagWarning] == 0 && Controlador->Flags[FlagTratamiento] == 0) {
+			matriz = Controlador->Puntos;
+			resolution = Controlador->ArrayDataAnalisys[posResolucion];//Resolucion
+			VCOCHE = Controlador->ArrayDataAnalisys[posApertura];//Vcoche
+			apertura = Controlador->ArrayDataAnalisys[posVcoche];//Apertura
 			NUMERO_COLUMNAS = matriz->Count / NUMERO_FILAS;
 
 			//Trabajo
@@ -72,37 +72,38 @@ void DataAnalisys::AnalisysThread(){
 			//Fin tratamiento
 
 			//Copiar el vector de obstaculos obtenido en control
-			Control->Obstaculos = ObstaculosvAnt;
+			Controlador->Obstaculos = ObstaculosvAnt;
 			//Llamamos a Open Gl para que dibuje los obstaculos
-			OpenGl->Dibujar Obstaculos;
+			Controlador->DibujarObstaculos();
 
 			//Actualizar consignas en el vector de conclusiones
-			Control->Conclusiones[0] = consigna_velocidad;
-			Control->Conclusiones[1] = consigna_volante;
+			Controlador->Conclusiones[0] = consigna_velocidad;
+			Controlador->Conclusiones[1] = consigna_volante;
 
 
 			//Control de colision y finalizacion
 
-			if (Control->Reader == 1) {
-				Warning = 1;
+			if (Controlador->Flags[FlagTratamiento] == 1) {
+				Controlador->Flags[FlagWarning] = 1;
 			}
-			Control->Reader = 1;
+			Controlador->Flags[FlagTratamiento] = 1;
 
 		}
 		else {
-			Control->Reader = 1;
-			Warning = 1;
+			Controlador->Flags[FlagTratamiento] = 1;
+			Controlador->Flags[FlagWarning] = 1;
 			break;
 		}
 
-		if (flagPausa)
+		if (Controlador->Flags[FlagPausa])
 			break;
 	}
 	
 
-	
+	/*-----------------------------------------------------------------------------------------*/
+	/*-----------------------------------------------------------------------------------------*/
+	/*-----------------------------------------------------------------------------------------*/
 
-	*/
 	//Conversion de vector de parametros de entrada a parametros locales
 	matriz = (List<Punto3D^>^)parameters_in[0];
 	resolution = (double)parameters_in[1];
@@ -126,6 +127,11 @@ void DataAnalisys::AnalisysThread(){
 	}
 	ObstaculosvAnt = Obstaculos;
 	Obstaculos->Clear();
+}
+
+void DataAnalisys::Kill()
+{
+	thread_analysis->Abort();
 }
 
 void DataAnalisys::Segmentacion(List<Punto3D^>^ matrix,double apertura)

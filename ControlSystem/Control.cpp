@@ -25,24 +25,30 @@ void Control::Iniciar()
 {
 	if (Flags[FlagAnalisysOn]==true) {
 		//Crear objeto DataAnalisys
-		DataAnalisys ^Analisys = gcnew DataAnalisys();
-		Analisys->prueba(this);
+		Analisys = gcnew DataAnalisys();
 	}
 	if (Flags[FlagOpenGlOn] == true) {
 		//Crear objeto OpenGl
-		OpenGl ^Dibujador = gcnew OpenGl();
+		Dibujador = gcnew OpenGl();
 	}
 	//Crear objeto DataReader
+	Reader = gcnew DataReader();
 	IniciarThreads();
 }
 
 void Control::IniciarThreads()
 {
-	throw gcnew System::NotImplementedException();
+	dataThreads[0]=this;
+	Analisys->Analisys(this);
 }
 
 void Control::reActivar()
 {
 	IniciarThreads();
+}
+
+void Control::DibujarObstaculos()
+{
+	Dibujador->modificarObstaculos(Obstaculos);
 }
 

@@ -10,6 +10,22 @@
 #define DISTANCIA_MAXIMA 2
 #define PI 3.14159265
 
+//Vector de flags
+#define FlagTratamiento 0
+#define FlagTratamiento 1
+#define FlagTratamiento 2
+#define FlagTratamiento 3
+#define FlagWarning 4
+#define FlagPausa 5
+#define FlagAnalisysOn 6
+#define FlagOpenGlOn 7
+
+//Vector Analisys
+
+#define posResolucion 0
+#define posApertura 1
+#define posVcoche 2
+
 using namespace std;
 using namespace System;
 using namespace System::Collections::Generic;
@@ -19,14 +35,16 @@ ref class DataAnalisys {
 public:
 	//Constructor
 	DataAnalisys();
-	void Analisys(cli::array<Object^>^ data);
+	void Analisys(Control^ C);
 	void AnalisysThread();
+	void Kill();
 	//void Analisys(List<Punto3D^>^ matriz, double resolucionAngular, double VCoche, double &consigna_velocidad, double &consigna_volante, double apertura);
 	//Se encarga de agrupar puntos en obstaculos/
 
 private:
-	double ^ consigna_velocidad;
-	double ^ consigna_volante;
+	Control ^Controlador;
+	double  consigna_velocidad;
+	double  consigna_volante;
 	double apertura;
 	int indice;
 	int menor;

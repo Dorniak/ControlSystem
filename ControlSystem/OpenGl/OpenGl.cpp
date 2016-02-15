@@ -65,13 +65,13 @@ void OpenGl::modificarPuntos(List<Punto3D^>^ listEntradaPuntos)
 		puntos[recorridoP]->setCoordinatesZ(listEntradaPuntos[recorridoP]->getCoordinatesZ());
 	}
 }
-void OpenGl::modificarObstaculos(List<Punto3D^>^ listEntradaObstaculos)
+void OpenGl::modificarObstaculos(List<Obstaculo^>^ listEntradaObstaculos)
 {
-	for (int recorridoO = 0; recorridoO < listEntradaObstaculos->Count; recorridoO++) {
+	/*for (int recorridoO = 0; recorridoO < listEntradaObstaculos->Count; recorridoO++) {
 		obstaculos[recorridoO]->setCoordinatesX(listEntradaObstaculos[recorridoO]->getCoordinatesX());
 		obstaculos[recorridoO]->setCoordinatesY(listEntradaObstaculos[recorridoO]->getCoordinatesY());
 		obstaculos[recorridoO]->setCoordinatesZ(listEntradaObstaculos[recorridoO]->getCoordinatesZ());
-	}
+	}*/
 }
 void OpenGl::dibujar()
 {

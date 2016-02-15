@@ -4,6 +4,7 @@
 #include "DataAnalisys.h"
 #include "OpenGl.h"
 
+#define FlagTratamiento 0
 #define FlagTratamiento 1
 #define FlagTratamiento 2
 #define FlagTratamiento 3
@@ -30,8 +31,13 @@ public:
 	void setFlagTratamiento();
 	void Iniciar();
 	void reActivar();
+	void DibujarObstaculos();
 	//Objeto OpenGl
 private:
+	cli::array<Object^>^ dataThreads=gcnew cli::array<Object^>(10);
+	DataAnalisys ^Analisys;
+	OpenGl ^Dibujador;
+	DataReader ^Reader;
 	//Objetos Reader y Analisys
 	void interpretarConclusiones();
 	void IniciarThreads();
