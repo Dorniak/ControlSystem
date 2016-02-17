@@ -79,22 +79,22 @@ void DataReader::ReadDataThread()
 	cli::array<Double>^ intensities;
 	Punto3D^ p;
 	int corte = -1;
-	double dist, ang, az,azi=-1;
+	double dist, ang, az, azi = -1;
 
 
 	while (read) {
 		try
 		{
 			ReceiveBytes = ClientLIDAR->Receive(LaserIpEndPoint);
-	
-			azimuths = InterpolateAzimuth(ReceiveBytes,&corte,&azi);
+
+			azimuths = InterpolateAzimuth(ReceiveBytes, &corte, &azi);
 			distances = ExtractDistances(ReceiveBytes);
 			intensities = ExtractIntensities(ReceiveBytes);
 
 			for (int block = 0; block < 12; block++) {
-				for (int i = 0; i < NUMBER_OF_CHANNELS;i++) {
-				//	if (corte == azimuth_index) {
-					if (azimuth_index > 0 && azimuths[azimuth_index] < azimuths[azimuth_index - 1]){
+				for (int i = 0; i < NUMBER_OF_CHANNELS; i++) {
+					//	if (corte == azimuth_index) {
+					if (azimuth_index > 0 && azimuths[azimuth_index] < azimuths[azimuth_index - 1]) {
 						loger->Close();
 						loger = gcnew StreamWriter(path + "\\frame-" + frame + ".log", false, Encoding::ASCII, 4096);
 						corte = -1;
@@ -112,23 +112,23 @@ void DataReader::ReadDataThread()
 						if (log_angle)
 							loger->Write("," + ang);
 						if (log_azimuth)
-							loger->Write(","+ az);
+							loger->Write("," + az);
 						if (log_dist)
 							loger->Write("," + dist);
 						loger->WriteLine();
-						
+
 					}
 					distance_index++;
 					intensity_index++;
 					azimuth_index++;
-				}			
+				}
 				loger->Flush();
 			}
 			azimuth_index = 0, distance_index = 0, intensity_index = 0;
 		}//Try
 		catch (Exception^ e)
 		{
-		//	System::Windows::Forms::MessageBox::Show(e->ToString());
+			//	System::Windows::Forms::MessageBox::Show(e->ToString());
 		}
 
 	}//while
@@ -154,8 +154,8 @@ void DataReader::Kill()
 /// </summary>
 /// <param name="ReceiveBytes">The receive bytes.</param>
 /// <returns></returns>
-cli::array<Double>^ DataReader::InterpolateAzimuth(cli::array<Byte>^ &ReceiveBytes,int *corte, double *azi) {
-	
+cli::array<Double>^ DataReader::InterpolateAzimuth(cli::array<Byte>^ &ReceiveBytes, int *corte, double *azi) {
+
 	if (ReceiveBytes->Length == 0)
 		throw gcnew Exception("Recibiendo 0 bytes...");
 
@@ -190,14 +190,14 @@ cli::array<Double>^ DataReader::InterpolateAzimuth(cli::array<Byte>^ &ReceiveByt
 				result[j + (32 * k)] -= 359.99;
 
 				if (*corte == -1)
-					*corte = (j + (32 * k) );
+					*corte = (j + (32 * k));
 			}
 		}
-		if (k<11){
+		if (k < 11) {
 			if (result[31 + (32 * k)] < result[(32 * (k + 1))]) {
 
 				if (*corte == -1)
-					*corte = 31 + (32 * k) ;
+					*corte = 31 + (32 * k);
 			}
 		}
 	}

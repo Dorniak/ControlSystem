@@ -35,35 +35,59 @@ ref class DataAnalisys {
 public:
 	//Constructor
 	DataAnalisys();
+	//Funcion que arranca el thread de analisis
 	void Analisys(Control^ C);
+	//Funcion de thread
 	void AnalisysThread();
+	//Funcion para abortar el thread
 	void Kill();
-	//void Analisys(List<Punto3D^>^ matriz, double resolucionAngular, double VCoche, double &consigna_velocidad, double &consigna_volante, double apertura);
-	//Se encarga de agrupar puntos en obstaculos/
 
 private:
+	//Objeto Control
 	Control ^Controlador;
+	//Valor de consigna de velocidad para el vector de conclusiones
 	double  consigna_velocidad;
+	//Valor de consigna de volante para el vector de conclusiones
 	double  consigna_volante;
+	
 	double apertura;
+
 	int indice;
+
 	int menor;
+	//Velocidad actual del coche
 	double VCOCHE;
+
 	double resolution;
-	int NUMERO_COLUMNAS;//numero de barridos que es variable por la configuracion del laser
+	//numero de barridos que es variable por la configuracion del laser
+	int NUMERO_COLUMNAS;
+	//Lista de obstaculos obtenidos en el analisys de la vuelta actual
 	List<Obstaculo^>^ Obstaculos = gcnew List<Obstaculo^>();
+	//Lista de obstaculos de la vuelta anterior
 	List<Obstaculo^>^ ObstaculosvAnt = gcnew List<Obstaculo^>();
+	//Lista usada para ordenacion
 	List<double>^ listMenor = gcnew List<double>();
+	//Funcion encargada de agrupar puntos en obstaculos
 	void Segmentacion(List<Punto3D^>^ matrix,double apertura);
+
 	void prepararObstaculos();
+	//Funcion encargada de eliminar obstaculos no validos
 	void EliminarObstaculos();
+	//Funcion encargada de relacionar los obstaculos obtenidos en la vuelta actual con los de la anterior
 	void RelacionarObstaculos();
+	//Funcion para relacionar los obstaculos por su velocidad
 	void relacionarVel(int i, int j);
+	//Funcion para relacionar los obstaculos por su posicion
 	void relacionarPos(int i, int j, int VelC, int Res);
+	//Funcion encargada de comprobar su existe un bloqueo frente al vehiculo
 	bool comprobarBloqueo(List<Punto3D^>^ matriz);
+	//Funcion que se encarga de decidir si dos puntos estan lo suficientemente cerca
+	//para considerarse parte de un mismo obstaculo
 	bool puntosCercanos(Punto3D^ p1, Punto3D^ p2);
+	//COnvierte una coordenada en el plano en una posicion de la lista de puntos
 	int convaPos(int a, int b);
+	//LIsta en la que se guardan los puntos de esta vuelta
 	List<Punto3D^>^ matriz;
+	//Objeto thread del analisys
 	Thread^ thread_analysis;
-	cli::array<Object^> ^ parameters_in;
 };

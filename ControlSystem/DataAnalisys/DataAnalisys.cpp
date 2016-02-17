@@ -7,7 +7,6 @@ DataAnalisys::DataAnalisys()
 	{
 		listMenor[k] = 0;
 	}
-	//TODO::Añadir objeto Open Gl y Systema de control
 }
 //matriz::Lista de puntos
 //resolucionAngular::resolucion del laser
@@ -22,16 +21,9 @@ void DataAnalisys::Analisys(Control^ C) {
 		thread_analysis = gcnew Thread(gcnew ThreadStart(this, &DataAnalisys::AnalisysThread));
 		thread_analysis->Start();
 	}
-	parameters_in[10] = thread_analysis->ThreadState;
+	//Guarda el identificador de thread en el array de threads del controlador 
+	Controlador->Threads[1] = thread_analysis;
 }
-
-/*parameters_in[0]		matriz	*/ //Lista de puntos recogidos
-/*parameters_in[1]		resolucion	*/ //resolucion angular horizontal
-/*parameters_in[2]		VCOCHE	*/  //Velocidad actual del coche
-/*parameters_in[3]		consigna_velocidad	*/ //Puntero para la consigna de velocidad
-/*parameters_in[4]		consigna_volante	*/ //Puntero para la consigna de volante
-/*parameters_in[5]		apertura	*/ //Apertura util del laser
-
 
 //List<Punto3D^>^ matriz, double resolucionAngular,double Vcoche, double &consigna_velocidad, double &consigna_volante, double apertura
 void DataAnalisys::AnalisysThread(){
@@ -71,22 +63,13 @@ void DataAnalisys::AnalisysThread(){
 
 			//Fin tratamiento
 
-			//Copiar el vector de obstaculos obtenido en control
-			Controlador->Obstaculos = ObstaculosvAnt;
-			//Llamamos a Open Gl para que dibuje los obstaculos
-			Controlador->DibujarObstaculos();
+			//Copiar el vector de obstaculos obtenido en control y comprueba colisiones
+			Controlador->guardarObstaculos(ObstaculosvAnt);
 
 			//Actualizar consignas en el vector de conclusiones
 			Controlador->Conclusiones[0] = consigna_velocidad;
 			Controlador->Conclusiones[1] = consigna_volante;
 
-
-			//Control de colision y finalizacion
-
-			if (Controlador->Flags[FlagTratamiento] == 1) {
-				Controlador->Flags[FlagWarning] = 1;
-			}
-			Controlador->Flags[FlagTratamiento] = 1;
 
 		}
 		else {
@@ -94,39 +77,9 @@ void DataAnalisys::AnalisysThread(){
 			Controlador->Flags[FlagWarning] = 1;
 			break;
 		}
-
 		if (Controlador->Flags[FlagPausa])
 			break;
 	}
-	
-
-	/*-----------------------------------------------------------------------------------------*/
-	/*-----------------------------------------------------------------------------------------*/
-	/*-----------------------------------------------------------------------------------------*/
-
-	//Conversion de vector de parametros de entrada a parametros locales
-	matriz = (List<Punto3D^>^)parameters_in[0];
-	resolution = (double)parameters_in[1];
-	VCOCHE = (double)parameters_in[2];
-	consigna_velocidad = (double)parameters_in[3];
-	consigna_volante = (double)parameters_in[4];
-	apertura = (double)parameters_in[5];
-	NUMERO_COLUMNAS = matriz->Count/NUMERO_FILAS;
-	
-	if (VCOCHE > 5) {
-		if (!comprobarBloqueo(matriz))
-		{
-			Segmentacion(matriz,apertura);
-			//TODO::Identificar tipo de obstaculo
-			EliminarObstaculos();
-			prepararObstaculos();
-			RelacionarObstaculos();
-			//TODO::Calcular TTC y actualizar consignas
-		}
-		else consigna_velocidad = 0.0;
-	}
-	ObstaculosvAnt = Obstaculos;
-	Obstaculos->Clear();
 }
 
 void DataAnalisys::Kill()

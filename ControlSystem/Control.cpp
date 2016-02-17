@@ -47,8 +47,45 @@ void Control::reActivar()
 	IniciarThreads();
 }
 
+void Control::DibujarPuntos()
+{
+	Dibujador->modificarPuntos(Puntos);
+}
+
 void Control::DibujarObstaculos()
 {
 	Dibujador->modificarObstaculos(Obstaculos);
 }
+
+void Control::guardarPuntos(List<Punto3D^>^ Punt)
+{
+	Puntos = Punt;
+	DibujarPuntos();
+	//Control de colision
+	if (Flags[FlagTratamiento] == 0) {
+		Flags[FlagWarning] = 1;
+		pausarThreads();
+	}
+	Flags[FlagTratamiento] = 0;
+}
+
+void Control::guardarObstaculos(List<Obstaculo^>^ Obst)
+{
+	Obstaculos = Obst;
+	DibujarObstaculos();
+	//Control de collision
+	if (Flags[FlagTratamiento] == 1) {
+		Flags[FlagWarning] = 1;
+		pausarThreads();
+	}
+	Flags[FlagTratamiento] = 1;
+}
+
+void Control::pausarThreads()
+{
+	for (int i = 0; i < Threads->Length; i++) {
+		Threads[i]->Abort();
+	}
+}
+
 
