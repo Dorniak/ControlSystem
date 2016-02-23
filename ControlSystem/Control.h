@@ -1,13 +1,19 @@
 #pragma once
-#include "Obstaculo.h"
 #include "reader.h"
 #include "DataAnalisys.h"
 #include "OpenGl.h"
 
+//Numero de parametros de los arrays
+#define numParametrosReader 10
+#define numParametrosAnalisys 10
+//Posicion parametros array Reader
+#define Ip 1
+
+//Posicion parametros array Analisys
+
+//Posicion parametros array Flags
 #define FlagTratamiento 0
-#define FlagTratamiento 1
-#define FlagTratamiento 2
-#define FlagTratamiento 3
+#define FlagLogOn 3
 #define FlagWarning 4
 #define FlagPausa 5
 #define FlagAnalisysOn 6
@@ -33,10 +39,12 @@ public:
 	cli::array<bool>^ Flags;
 	//Conjunto de parametros que necesita el DataAnalisys en tiempo de ejecucion
 	cli::array<double>^ ArrayDataAnalisys;
+	cli::array<Object^>^ ArrayDataReader;
 	//Pone el flag de conclusion a 1 para que la aplicacion que lo recoja sepa que las conclusiones estan listas
 	void setFlagTratamiento();
 	void Iniciar();
 	void reActivar();
+	void Parar();
 	//Funcion que le dice al OpenGl que los puntos estan listos para ser dibujados
 	void DibujarPuntos();
 	//Funcion que le dice al OpenGl que los obstaculos estan listos para ser dibujados
@@ -47,15 +55,12 @@ public:
 	void guardarPuntos(List<Punto3D^>^ Punt);
 	void guardarObstaculos(List<Obstaculo^>^ Obst);
 private:
-	void pausarThreads();
-	//Parametros de arranque para los threads
-	cli::array<Object^>^ dataThreads=gcnew cli::array<Object^>(10);
 	//Objeto DataAnalisys
-	DataAnalisys ^Analisys;
+	DataAnalisys^ Analisys;
 	//Objeto OpenGl
-	OpenGl ^Dibujador;
+	OpenGl^ Dibujador;
 	//Objeto DataReader
-	DataReader ^Reader;
+ 	DataReader^ Reader;
 	//Funcion final de la que se sacan las conclusiones del vehiculo
 	void interpretarConclusiones();
 	//Funcion que inicia cada objeto con todos los parametros necesarios

@@ -1,7 +1,8 @@
 #pragma once
 #include "Obstaculo.h"
 #include <math.h>
-#include "../Control.h"
+#include "OpenGl.h"
+//#include <timeApi.h>
 
 //#include <cliext/vector> para clases referenciadas
 #define NUMERO_FILAS 16 //Coincide con el numero de canales
@@ -19,6 +20,7 @@
 #define FlagPausa 5
 #define FlagAnalisysOn 6
 #define FlagOpenGlOn 7
+#define FlagLogOn 8
 
 //Vector Analisys
 
@@ -36,15 +38,25 @@ public:
 	//Constructor
 	DataAnalisys();
 	//Funcion que arranca el thread de analisis
-	void Analisys(Control^ C);
+	void Analisys(List<Punto3D^>^ puntosControl, List<Obstaculo^>^ ObstaculosControl, cli::array<double>^ ParamAnalisys,List<int>^ Conclusiones, cli::array<bool>^ Flags, cli::array<Thread^>^ Threads,OpenGl^ Dibujador);
 	//Funcion de thread
 	void AnalisysThread();
 	//Funcion para abortar el thread
 	void Kill();
 
 private:
-	//Objeto Control
-	Control ^Controlador;
+	OpenGl^ Dibujador;
+
+	//Funcion que copia los obstaculos de la vuelta actual a la anterior y al control
+	void copiarObstaculos();
+	//Puntero al array de thread
+	cli::array<Thread^>^ Threads;
+	//Puntero al array de flags
+	cli::array<bool>^ Flags;
+	//Puntero a la lista de conclusiones
+	List<int>^ Conclusiones;
+	//array de parametros del DataAnalisys
+	cli::array<double>^ parametros;
 	//Valor de consigna de velocidad para el vector de conclusiones
 	double  consigna_velocidad;
 	//Valor de consigna de volante para el vector de conclusiones

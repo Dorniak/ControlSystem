@@ -1,5 +1,5 @@
 #include "Punto3D.h"
-
+#define PI 3.14159265
 #pragma region Constructors
 //Copy constructor
 Punto3D::Punto3D(const Punto3D %copy)
@@ -22,7 +22,6 @@ Punto3D::Punto3D(const Punto3D %copy)
 /// <param name="r">The horizontal angle.</param>
 /// <param name="a">The vertical angle.</param>
 Punto3D::Punto3D(double d, double i, double r, double a) {
-
 	Distance = d;
 	Intensity = i;
 	Azimuth = r;
@@ -33,6 +32,10 @@ Punto3D::Punto3D(double xx, double yy, double zz)
 	x = xx;
 	y = yy;
 	z = zz;
+	Distance = -1;
+	Intensity = -1;
+	Azimuth = -1;
+	Angle = -1;
 }
 /// <summary>
 /// Initializes a new instance of the <see cref="Punto3D"/> class.
@@ -100,33 +103,6 @@ void Punto3D::setIntensity(double i) {
 /// <param name="r">The horizontal angle.</param>
 void Punto3D::setAzimuth(double r) {
 	Azimuth = r;
-}
-/// <summary>
-/// Sets the distance with bytes(Little endian ).
-/// </summary>
-/// <param name="i">First byte.</param>
-/// <param name="j">Second byte.</param>
-void Punto3D::setDistance(Byte i, Byte j)
-{
-	Distance = i + (j << 8);
-	Distance /= 500; //Distance * 2 and convert from mm to m (/1000)
-}
-/// <summary>
-/// Sets the intensity with bytes(Little endian ).
-/// </summary>
-/// <param name="i">The Byte.</param>
-void Punto3D::setIntensity(Byte i)
-{
-	Intensity = i;
-}
-/// <summary>
-/// Sets the azimuth with bytes(Little endian ).
-/// <param name="i">First byte.</param>
-/// <param name="j">Second byte.</param>
-void Punto3D::setAzimuth(Byte i, Byte j)
-{
-	Azimuth = i + (j << 8);
-	Azimuth /= 100;
 }
 /// <summary>
 /// Sets the vertical angle.
@@ -230,20 +206,36 @@ double Punto3D::getModule()
 
 #pragma region Others Functions
 
-void Punto3D::visualize()
+String^ Punto3D::visualize()
 {
-	Console::WriteLine("X: {0}\t Y: {1}\t Z: {2}",x,y,z);
+	return "X: " + x + "\t Y: " + y + "\t Z: " + z;
 }
 
 /// <summary>
 /// Calculates the coordinates.
 /// </summary>
-void Punto3D::CalculateCoordinates(double xx, double yy, double zz)
+void Punto3D::CalculateCoordinates(double xx, double yy, double zz, double pitch, double roll, double yaw)
 {
-	x = (Distance*cos(Angle)*sin(Azimuth)) +xx;
-	y = (Distance*cos(Angle)*cos(Azimuth)) + yy;
-	z = (Distance*sin(Angle)) + zz;
+	if (pitch + roll + yaw != 0) {
+		pitch *= PI / 180.0;
+		roll *= PI / 180.0;
+		yaw *= PI / 180.0;
+
+		double tx = (Distance * cos(Angle * PI / 180.0) * sin(Azimuth * PI / 180.0));
+		double ty = (Distance * cos(Angle * PI / 180.0) * cos(Azimuth * PI / 180.0));
+		double tz = (Distance * sin(Angle * PI / 180.0));
+
+		x = (((cos(pitch)*cos(yaw))*tx) + ((cos(pitch)*sin(yaw))*ty) + ((-sin(pitch))*tz)) + xx;
+		y = ((((sin(roll)*sin(pitch)*cos(yaw)) - (cos(pitch)*cos(roll)*sin(yaw)))*tx) + (((cos(pitch)*cos(roll)*cos(yaw)) + (sin(roll)*sin(pitch)*sin(yaw)))*ty) + ((sin(roll)*cos(pitch))*tz)) + yy;
+		z = ((((cos(pitch)*cos(roll)*sin(pitch)*cos(yaw)) + (sin(roll)*sin(yaw)))*tx) + (((cos(pitch)*cos(roll)*sin(pitch)*sin(yaw)) - (sin(roll)*cos(yaw)))*ty) + ((cos(pitch)*cos(roll)*cos(pitch))*tz)) + zz;
+	}
+	else {
+		x = (Distance * cos(Angle * PI / 180.0) * sin(Azimuth * PI / 180.0)) + xx;
+		y = (Distance * cos(Angle * PI / 180.0) * cos(Azimuth * PI / 180.0)) + yy;
+		z = (Distance * sin(Angle * PI / 180.0)) + zz;
+	}
 }
+
 /// <summary>
 /// Distances between points.
 /// </summary>
@@ -252,10 +244,6 @@ void Punto3D::CalculateCoordinates(double xx, double yy, double zz)
 double Punto3D::distanceToPoint(Punto3D^ p)
 {
 	return (p - this)->getModule();
-}
-String ^ Punto3D::verCoordenadas()
-{
-	return ""+ x +","+ y +","+ z;
 }
 #pragma endregion
 
@@ -304,5 +292,4 @@ Punto3D^ Punto3D::operator=(Punto3D^ v)
 
 	return result;
 }
-
 #pragma endregion

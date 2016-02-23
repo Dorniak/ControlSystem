@@ -1,6 +1,7 @@
 #include "DataAnalisys.h"
 DataAnalisys::DataAnalisys()
 {
+	//timeBeginPeriod(1);
 	indice = -1;
 	menor = -1;
 	for (int k = 0; k < 4; k++)
@@ -14,77 +15,90 @@ DataAnalisys::DataAnalisys()
 //consigna velocidad:: puntero para devolucion de parametro de velocidad
 //consigna volante:: puntero para devolucion de parametro de volante
 //apertura::Angulo de interes de lectura en grados
-void DataAnalisys::Analisys(Control^ C) {
+void DataAnalisys::Analisys(List<Punto3D^>^ puntosControl, List<Obstaculo^>^ ObstaculosControl, array<double>^ ParamAnalisys, List<int>^ Conclusiones, array<bool>^ Flags, array<Thread^>^ Threads,OpenGl^ Dibujador) {
 
-	Controlador = C;
-	if (!thread_analysis || thread_analysis->ThreadState != System::Threading::ThreadState::Running) {
+	this->Dibujador = Dibujador;
+	this->Threads = Threads;
+	this->Flags = Flags;
+	parametros = ParamAnalisys;
+	this->Conclusiones = Conclusiones;
+	matriz = puntosControl;
+	ObstaculosvAnt = ObstaculosControl;
+	Obstaculos->Clear();
+	if (!thread_analysis) {
 		thread_analysis = gcnew Thread(gcnew ThreadStart(this, &DataAnalisys::AnalisysThread));
-		thread_analysis->Start();
 	}
+	thread_analysis->Start();
 	//Guarda el identificador de thread en el array de threads del controlador 
-	Controlador->Threads[1] = thread_analysis;
+	Threads[1] = thread_analysis;
 }
 
 //List<Punto3D^>^ matriz, double resolucionAngular,double Vcoche, double &consigna_velocidad, double &consigna_volante, double apertura
-void DataAnalisys::AnalisysThread(){
-	
-	
+void DataAnalisys::AnalisysThread() {
+
+
 	//En caso de que se desactive y se reactive despues hay que limpiar los objetos
-
 	ObstaculosvAnt->Clear();
-	
-	//TODO:Modificar la funcion con un while y añadir las modificaciones de flags
-	while (Controlador->Flags[FlagAnalisysOn]) {
-		if (Controlador->Flags[FlagWarning] == 0 && Controlador->Flags[FlagTratamiento] == 0) {
-			matriz = Controlador->Puntos;
-			resolution = Controlador->ArrayDataAnalisys[posResolucion];//Resolucion
-			VCOCHE = Controlador->ArrayDataAnalisys[posApertura];//Vcoche
-			apertura = Controlador->ArrayDataAnalisys[posVcoche];//Apertura
-			NUMERO_COLUMNAS = matriz->Count / NUMERO_FILAS;
 
-			//Trabajo
+	while (Flags[FlagAnalisysOn] && Flags[FlagWarning] && !Flags[FlagPausa]) {
+		try
+		{
+			if (Flags[FlagTratamiento] == 0) {
+				//matriz = Controlador->Puntos;  La matriz es siempre igual a la matriz de puntos
+				resolution = parametros[posResolucion];//Resolucion
+				VCOCHE = parametros[posApertura];//Vcoche
+				apertura = parametros[posVcoche];//Apertura
+				NUMERO_COLUMNAS = matriz->Count / NUMERO_FILAS;
 
+				//Trabajo
 
-			if (VCOCHE > 5) {
-				if (!comprobarBloqueo(matriz))
-				{
-					Segmentacion(matriz, apertura);
-					//TODO::Identificar tipo de obstaculo
-					EliminarObstaculos();
-					prepararObstaculos();
-					RelacionarObstaculos();
-					//TODO::Calcular TTC y actualizar consignas
+				if (VCOCHE > 5) {
+					if (!comprobarBloqueo(matriz))
+					{
+						Segmentacion(matriz, apertura);
+						//TODO::Identificar tipo de obstaculo
+						EliminarObstaculos();
+						prepararObstaculos();
+						RelacionarObstaculos();
+						//TODO::Calcular TTC y actualizar consignas
+					}
+					else consigna_velocidad = 0.0;
 				}
-				else consigna_velocidad = 0.0;
+
+				//Fin tratamiento
+
+				//Copiar el vector de obstaculos obtenido en control y comprueba colisiones
+				copiarObstaculos();
+
+				//Actualizar consignas en el vector de conclusiones
+				Conclusiones[0] = consigna_velocidad;
+				Conclusiones[1] = consigna_volante;
 			}
-			ObstaculosvAnt = Obstaculos;
-			Obstaculos->Clear();
-
-
-			//Fin tratamiento
-
-			//Copiar el vector de obstaculos obtenido en control y comprueba colisiones
-			Controlador->guardarObstaculos(ObstaculosvAnt);
-
-			//Actualizar consignas en el vector de conclusiones
-			Controlador->Conclusiones[0] = consigna_velocidad;
-			Controlador->Conclusiones[1] = consigna_volante;
-
-
 		}
-		else {
-			Controlador->Flags[FlagTratamiento] = 1;
-			Controlador->Flags[FlagWarning] = 1;
-			break;
+		catch (Exception^ e)
+		{
+			Flags[FlagWarning] = true;
+			//	System::Windows::Forms::MessageBox::Show(e->ToString());
 		}
-		if (Controlador->Flags[FlagPausa])
-			break;
 	}
 }
 
 void DataAnalisys::Kill()
 {
 	thread_analysis->Abort();
+}
+
+void DataAnalisys::copiarObstaculos()
+{
+	ObstaculosvAnt->Clear();
+	ObstaculosvAnt->AddRange(Obstaculos);
+	Dibujador->modificarObstaculos(ObstaculosvAnt);
+	//Control de collision
+	if (Flags[FlagTratamiento] == 1) {
+		Flags[FlagWarning] = 1;
+		//mensaje pantalla
+	}
+	Flags[FlagTratamiento] = 1;
 }
 
 void DataAnalisys::Segmentacion(List<Punto3D^>^ matrix,double apertura)

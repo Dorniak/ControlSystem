@@ -32,46 +32,42 @@ DataReader::~DataReader()
 /// ClientLIDAR elimina la cabecera de 42 bytes </para>
 /// </summary>
 
-void DataReader::ReadData(cli::array<Object^> ^ data)
+void DataReader::ReadData(List<Punto3D^>^ puntosControl, cli::array<Object^>^ ParamReader, cli::array<bool>^ Flags, cli::array<Thread^>^ Threads, OpenGl^ Dibujador)
 {
-	parameters_in = (cli::array<Object^>^)data;
-	if (!thread_reader || thread_reader->ThreadState != System::Threading::ThreadState::Running) {
+	this->Threads = Threads;
+	this->Flags = Flags;
+	ArrayDataReader = ParamReader;
+	this->puntosControl = puntosControl;
+	this->Dibujador = Dibujador;
+
+	if (!thread_reader) {
 		thread_reader = gcnew Thread(gcnew ThreadStart(this, &DataReader::ReadDataThread));
-		path = parameters_in[10] + "\\" + DateTime::Now.ToString("dd - MMMM - yyyy - HH - mm - ss");
+	}
+	thread_reader->Start();
+	Threads[0] = thread_Reader;
+}
+void DataReader::ReadDataThread()
+{
+	if (Flags[FlagLogOn]) {
+		path = (String^)ArrayDataReader[0] + "\\" + DateTime::Now.ToString("dd - MMMM - yyyy - HH - mm - ss");
 		Directory::CreateDirectory(path);
 		frame = 0;
 		loger = gcnew StreamWriter(path + "\\frame-" + frame + ".log", false, Encoding::ASCII, 4096);
 		loger->AutoFlush = false;
-		read = true;
-		thread_reader->Start();
+		log = true;
 	}
-}
-void DataReader::StopReadData()
-{
-	try
-	{
-		read = false;
+	else {
+		log = false;
 	}
-	catch (Exception^e)
-	{
-	}
-}
-void DataReader::ReadDataThread()
-{
 	double CALIBRATE_X, CALIBRATE_Y, CALIBRATE_Z, CALIBRATE_R, CALIBRATE_P, CALIBRATE_W, max, min;
-	bool log_coor, log_dist, log_azimuth, log_angle;
-	CALIBRATE_X = Convert::ToDouble(parameters_in[0]);
-	CALIBRATE_Y = Convert::ToDouble(parameters_in[1]);
-	CALIBRATE_Z = Convert::ToDouble(parameters_in[2]);
-	CALIBRATE_R = Convert::ToDouble(parameters_in[3]);
-	CALIBRATE_P = Convert::ToDouble(parameters_in[4]);
-	CALIBRATE_Y = Convert::ToDouble(parameters_in[5]);
-	log_coor = Convert::ToBoolean(parameters_in[6]);
-	log_dist = Convert::ToBoolean(parameters_in[7]);
-	log_angle = Convert::ToBoolean(parameters_in[8]);
-	log_azimuth = Convert::ToBoolean(parameters_in[9]);
-	max = Convert::ToDouble(parameters_in[11]);
-	min = Convert::ToDouble(parameters_in[12]);
+	CALIBRATE_X = Convert::ToDouble(ArrayDataReader[0]);
+	CALIBRATE_Y = Convert::ToDouble(ArrayDataReader[1]);
+	CALIBRATE_Z = Convert::ToDouble(ArrayDataReader[2]);
+	CALIBRATE_R = Convert::ToDouble(ArrayDataReader[3]);
+	CALIBRATE_P = Convert::ToDouble(ArrayDataReader[4]);
+	CALIBRATE_Y = Convert::ToDouble(ArrayDataReader[5]);
+	max = Convert::ToDouble(ArrayDataReader[11]);
+	min = Convert::ToDouble(ArrayDataReader[12]);
 	int azimuth_index = 0, distance_index = 0, intensity_index = 0;
 	cli::array<Byte>^ ReceiveBytes;
 	cli::array<Double>^ azimuths;
@@ -82,7 +78,7 @@ void DataReader::ReadDataThread()
 	double dist, ang, az, azi = -1;
 
 
-	while (read) {
+	while (Flags[FlagWarning] && !Flags[FlagPausa]) {
 		try
 		{
 			ReceiveBytes = ClientLIDAR->Receive(LaserIpEndPoint);
@@ -96,6 +92,8 @@ void DataReader::ReadDataThread()
 					//	if (corte == azimuth_index) {
 					if (azimuth_index > 0 && azimuths[azimuth_index] < azimuths[azimuth_index - 1]) {
 						loger->Close();
+						copiarPuntos();
+						//Controlador->guardarPuntos(Puntos);
 						loger = gcnew StreamWriter(path + "\\frame-" + frame + ".log", false, Encoding::ASCII, 4096);
 						corte = -1;
 						frame++;
@@ -106,16 +104,10 @@ void DataReader::ReadDataThread()
 						ang = getAngle(i);
 						p = gcnew Punto3D(dist, intensities[intensity_index], az, ang);
 						p->CalculateCoordinates(CALIBRATE_X, CALIBRATE_Y, CALIBRATE_Z, CALIBRATE_P, CALIBRATE_R, CALIBRATE_Y);
-
-						if (log_coor)
-							loger->Write(p->verCoordenadas());
-						if (log_angle)
-							loger->Write("," + ang);
-						if (log_azimuth)
-							loger->Write("," + az);
-						if (log_dist)
-							loger->Write("," + dist);
-						loger->WriteLine();
+						Puntos->Add(p);
+						if (log) {
+							loger->WriteLine();
+						}
 
 					}
 					distance_index++;
@@ -125,9 +117,11 @@ void DataReader::ReadDataThread()
 				loger->Flush();
 			}
 			azimuth_index = 0, distance_index = 0, intensity_index = 0;
+
 		}//Try
 		catch (Exception^ e)
 		{
+			Flags[FlagWarning] = true;
 			//	System::Windows::Forms::MessageBox::Show(e->ToString());
 		}
 
@@ -260,6 +254,19 @@ cli::array<Double>^ DataReader::ExtractIntensities(cli::array<Byte>^ &ReceiveByt
 		}
 	}
 	return intensities;
+}
+
+void DataReader::copiarPuntos()
+{
+	Dibujador->modificarPuntos(puntosControl);
+	puntosControl->Clear();
+	puntosControl->AddRange(Puntos);
+	//Control de colision
+	if (Flags[FlagTratamiento] == 0) {
+		Flags[FlagWarning] = 1;
+		//mensaje pantalla
+	}
+	Flags[FlagTratamiento] = 0;
 }
 
 /// <summary>

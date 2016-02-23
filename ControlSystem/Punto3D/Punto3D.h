@@ -22,9 +22,6 @@ public:
 	void setDistance(double d);
 	void setIntensity(double i);
 	void setAzimuth(double r);
-	void setDistance(Byte i, Byte j);
-	void setIntensity(Byte i);
-	void setAzimuth(Byte i, Byte j);
 	void setAngle(int channel);
 #pragma endregion
 
@@ -42,15 +39,13 @@ public:
 
 #pragma region Others
 
-	void visualize();
-	void CalculateCoordinates(double xx, double yy, double zz);
-	double distanceToPoint(Punto3D^ p);
-	String^ verCoordenadas();
 	Punto3D^ operator-(Punto3D^ v);
 	Punto3D^ operator=(Punto3D^ v);
 	Punto3D^ operator+(Punto3D^ v);
 	Punto3D^ operator*(double d);
-
+	double distanceToPoint(Punto3D^ p);
+	String^ visualize();
+	void CalculateCoordinates(double xx, double yy, double zz, double pitch, double roll, double yaw);
 #pragma endregion
 
 private:

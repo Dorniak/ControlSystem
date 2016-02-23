@@ -105,9 +105,10 @@
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>
       </SDLCheck>
-      <AdditionalIncludeDirectories>.\Punto3D;.\Obstaculo;.\OpenGl;.\DataAnalisys;.\DataReader</AdditionalIncludeDirectories>
-      <DebugInformationFormat>OldStyle</DebugInformationFormat>
+      <AdditionalIncludeDirectories>D:\Documentos\GitHub\ControlSystem\ControlSystem\freeglut\include\GL;.\Punto3D;.\Obstaculo;.\OpenGl;.\DataAnalisys;.\DataReader</AdditionalIncludeDirectories>
       <CompileAsManaged>true</CompileAsManaged>
+      <CompileAsWinRT>false</CompileAsWinRT>
+      <DebugInformationFormat>OldStyle</DebugInformationFormat>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -153,23 +154,35 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\Lidar\Lidar\Obstaculo.h" />
-    <ClInclude Include="..\..\Lidar\Lidar\Punto3D.h" />
     <ClInclude Include="Control.h" />
     <ClInclude Include="DataAnalisys\DataAnalisys.h" />
     <ClInclude Include="DataReader\reader.h" />
+    <ClInclude Include="Obstaculo\Obstaculo.h" />
     <ClInclude Include="OpenGl\OpenGl.h" />
+    <ClInclude Include="Punto3D\Punto3D.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\Lidar\Lidar\Obstaculo.cpp" />
-    <ClCompile Include="..\..\Lidar\Lidar\Punto3D.cpp" />
     <ClCompile Include="Control.cpp" />
     <ClCompile Include="DataAnalisys\DataAnalisys.cpp" />
     <ClCompile Include="DataReader\reader.cpp" />
     <ClCompile Include="Main.cpp" />
+    <ClCompile Include="Obstaculo\Obstaculo.cpp" />
     <ClCompile Include="OpenGl\OpenGl.cpp" />
+    <ClCompile Include="Punto3D\Punto3D.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
+    <Import Project="..\packages\nupengl.core.redist.0.1.0.1\build\native\nupengl.core.redist.targets" Condition="Exists('..\packages\nupengl.core.redist.0.1.0.1\build\native\nupengl.core.redist.targets')" />
+    <Import Project="..\packages\nupengl.core.0.1.0.1\build\native\nupengl.core.targets" Condition="Exists('..\packages\nupengl.core.0.1.0.1\build\native\nupengl.core.targets')" />
   </ImportGroup>
+  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
+    <PropertyGroup>
+      <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
+    </PropertyGroup>
+    <Error Condition="!Exists('..\packages\nupengl.core.redist.0.1.0.1\build\native\nupengl.core.redist.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\nupengl.core.redist.0.1.0.1\build\native\nupengl.core.redist.targets'))" />
+    <Error Condition="!Exists('..\packages\nupengl.core.0.1.0.1\build\native\nupengl.core.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\nupengl.core.0.1.0.1\build\native\nupengl.core.targets'))" />
+  </Target>
 </Project>

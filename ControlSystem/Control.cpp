@@ -6,7 +6,8 @@ Control::Control()
 	Puntos = gcnew List<Punto3D^>();
 	Conclusiones = gcnew List<int>();
 	Flags = gcnew cli::array<bool>(10);
-	ArrayDataAnalisys = gcnew cli::array<double>(10);
+	ArrayDataAnalisys = gcnew cli::array<double>(numParametrosAnalisys);
+	ArrayDataReader = gcnew cli::array<Object^>(numParametrosReader);
 }
 //Es el encargado de poner el flag de fin de tratamiento a 1 a la vez 
 // que llama a la funcion de interpretar conclusiones
@@ -32,19 +33,25 @@ void Control::Iniciar()
 		Dibujador = gcnew OpenGl();
 	}
 	//Crear objeto DataReader
-	Reader = gcnew DataReader();
+	Reader = gcnew DataReader((IPEndPoint^)ArrayDataReader[Ip]);
 	IniciarThreads();
 }
 
 void Control::IniciarThreads()
 {
-	dataThreads[0]=this;
-	Analisys->Analisys(this);
+	Reader->ReadData(Puntos,ArrayDataReader, Flags, Threads, Dibujador);
+	Analisys->Analisys(Puntos, Obstaculos, ArrayDataAnalisys, Conclusiones, Flags, Threads, Dibujador);
 }
 
 void Control::reActivar()
 {
-	IniciarThreads();
+	Flags[FlagPausa] = false;
+	Reader->ReadData(Puntos, ArrayDataReader, Flags, Threads, Dibujador);
+	Analisys->Analisys(Puntos,Obstaculos,ArrayDataAnalisys,Conclusiones,Flags,Threads,Dibujador);
+}
+void Control::Parar()
+{
+	Flags[FlagPausa] = true;
 }
 
 void Control::DibujarPuntos()
@@ -64,7 +71,7 @@ void Control::guardarPuntos(List<Punto3D^>^ Punt)
 	//Control de colision
 	if (Flags[FlagTratamiento] == 0) {
 		Flags[FlagWarning] = 1;
-		pausarThreads();
+		//mensaje pantalla
 	}
 	Flags[FlagTratamiento] = 0;
 }
@@ -76,16 +83,8 @@ void Control::guardarObstaculos(List<Obstaculo^>^ Obst)
 	//Control de collision
 	if (Flags[FlagTratamiento] == 1) {
 		Flags[FlagWarning] = 1;
-		pausarThreads();
+		//mensaje pantalla
 	}
 	Flags[FlagTratamiento] = 1;
 }
-
-void Control::pausarThreads()
-{
-	for (int i = 0; i < Threads->Length; i++) {
-		Threads[i]->Abort();
-	}
-}
-
 

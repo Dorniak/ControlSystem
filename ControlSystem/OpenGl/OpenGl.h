@@ -3,7 +3,7 @@
 #include <math.h>
 #include <stdio.h>
 #include "Punto3D.h"
-#include "../Control.h"
+#include "Obstaculo.h"
 
 
 using namespace System;
